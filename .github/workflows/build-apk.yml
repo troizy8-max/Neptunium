@@ -28,22 +28,20 @@ jobs:
           yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses
           /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
 
-      - name: Extract project
+    
+      - name: Find and extract project
         run: |
-          unzip -o Neptunium_External_v1_Source.zip -d project
+          echo "Files in repository:"
+          ls -la
+          ZIP_FILE=$(find . -maxdepth 3 -type f -iname "*.zip" | head -n 1)
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.9"
+          if [ -z "$ZIP_FILE" ]; then
+            echo "ERROR: ZIP archive not found!"
+            exit 1
+          fi
 
-      - name: Build APK
-        working-directory: project
-        run: gradle assembleDebug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Neptunium-External
-          path: project/app/build/outputs/apk/debug/app-debug.apk
+          echo "Found: $ZIP_FILE"
+          mkdir -p project
+          unzip -o "$ZIP_FILE" -d project
+          ls -la project
           
